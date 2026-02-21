@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./resources/my-edit-logger.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
