@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Scooter - Jasmine Unit Tests</title>
+    <link rel="stylesheet" href="lib/jasmine.css">
+</head>
+<body>
+
+<script src="lib/jasmine.js"></script>
+<script src="lib/jasmine-html.js"></script>
+<script src="lib/boot0.js"></script>
+<script src="lib/boot1.js"></script>
+
+<script>
+    // boot1.js sets window.onload to initialise the reporter and run specs.
+    // Capture it and suppress auto-execution so we can trigger it ourselves
+    // after RequireJS finishes loading the AMD spec modules.
+    const executeJasmine = window.onload;
+    window.onload = null;
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+    require.config({
+        // SpecRunner.html is at tests/jasmine/; go up two levels to reach project root
+        baseUrl: '../../',
+        paths: {
+            'knockout': 'knockout-min',
+            'scooter': '.'
+        }
+    });
+
+    require([
+        'tests/jasmine/utils.spec',
+        'tests/jasmine/AttendeeList.spec',
+        'tests/jasmine/storage.spec'
+    ], function() {
+        // All specs are registered; hand off to Jasmine.
+        executeJasmine();
+    });
+</script>
+
+</body>
+</html>

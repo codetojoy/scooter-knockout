@@ -33,3 +33,8 @@ See @docs/GameRules.md for the rules and example of the game.
 * [COMPLETE] Store state of play in browser local storage so that a browser restart maintains state of play: i.e. names that have been eliminated and names that are still eligible for the prize.
     * [COMPLETE] If no state is present, then assume it is a new game.
     * [COMPLETE] The reset button should clear local storage.
+
+### Phase 3
+
+* [COMPLETE] Write Playwright tests for basic behaviour of the app.
+* [COMPLETE] Write Jasmine tests for Javascript code.

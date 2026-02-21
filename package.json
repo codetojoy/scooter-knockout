@@ -1,0 +1,12 @@
+{
+    "name": "scooter-knockout",
+    "description": "Dev dependencies for testing only. The app itself has no npm dependencies.",
+    "private": true,
+    "devDependencies": {
+        "@playwright/test": "^1.50.0"
+    },
+    "scripts": {
+        "test:playwright": "npx playwright test",
+        "test:jasmine": "echo 'Open http://localhost:8080/tests/jasmine/SpecRunner.html in a browser (run ./run.sh first)'"
+    }
+}
