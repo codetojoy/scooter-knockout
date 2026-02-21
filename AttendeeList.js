@@ -1,66 +1,83 @@
-define(["dojo/_base/declare", "scooter/utils"], function (declare, utils) {
-  return declare("AttendeeList", null, {
-    constructor: function (names) {
-      this.init(names);
-    },
-    getNumNames: function () {
-      return this.names.length;
-    },
+/*
+ * Copyright 2026 Michael Easter / @codetojoy
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+define(['scooter/utils'], function(utils) {
 
-    getName: function (i) {
-      return this.names[i];
-    },
+    function AttendeeList(names) {
+        this.init(names);
+    }
 
-    getNumLosers: function () {
-      return this.losers.length;
-    },
+    AttendeeList.prototype.getNumNames = function() {
+        return this.names.length;
+    };
 
-    getNumSurvivors: function () {
-      return this.survivors.length;
-    },
+    AttendeeList.prototype.getName = function(i) {
+        return this.names[i];
+    };
 
-    clear: function () {
-      this.losers = [];
-      this.survivors = this.names.slice();
-    },
+    AttendeeList.prototype.getNumLosers = function() {
+        return this.losers.length;
+    };
 
-    init: function (names) {
-      this.names = utils.shuffleNames(names);
-      this.losers = [];
-      this.survivors = this.names.slice();
-    },
+    AttendeeList.prototype.getNumSurvivors = function() {
+        return this.survivors.length;
+    };
 
-    reset: function () {
-      this.init(this.names);
-    },
+    AttendeeList.prototype.clear = function() {
+        this.losers = [];
+        this.survivors = this.names.slice();
+    };
 
-    loses: function (name) {
-      this.losers.push(name);
-      const nameIndex = this.survivors.indexOf(name);
-      this.survivors.splice(nameIndex, 1);
-    },
+    AttendeeList.prototype.init = function(names) {
+        this.names = utils.shuffleNames(names);
+        this.losers = [];
+        this.survivors = this.names.slice();
+    };
 
-    doesWinnerExist: function () {
-      return this.survivors.length == 1;
-    },
+    AttendeeList.prototype.reset = function() {
+        this.init(this.names);
+    };
 
-    isWinner: function (name) {
-      return this.doesWinnerExist() && this.survivors.indexOf(name) == 0;
-    },
+    AttendeeList.prototype.loses = function(name) {
+        this.losers.push(name);
+        const nameIndex = this.survivors.indexOf(name);
+        this.survivors.splice(nameIndex, 1);
+    };
 
-    isLoserThisRound: function (name) {
-      let result = false;
+    AttendeeList.prototype.doesWinnerExist = function() {
+        return this.survivors.length == 1;
+    };
 
-      if (!this.doesWinnerExist() && this.losers.indexOf(name) == -1) {
-        const numChances = 4;
+    AttendeeList.prototype.isWinner = function(name) {
+        return this.doesWinnerExist() && this.survivors.indexOf(name) == 0;
+    };
 
-        if (utils.oneInNChance(numChances)) {
-          this.loses(name);
-          result = true;
+    AttendeeList.prototype.isLoserThisRound = function(name) {
+        let result = false;
+
+        if (!this.doesWinnerExist() && this.losers.indexOf(name) == -1) {
+            const numChances = 4;
+
+            if (utils.oneInNChance(numChances)) {
+                this.loses(name);
+                result = true;
+            }
         }
-      }
 
-      return result;
-    },
-  });
+        return result;
+    };
+
+    return AttendeeList;
 });

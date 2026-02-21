@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Scooter - PEI Devs assistant</title>
 
-
     <script type="text/javascript" src="ATTENDEE_LIST_EDIT_THIS_ONE.js"></script>
     <link rel="stylesheet" href="scooter.css" />
 
@@ -13,23 +12,25 @@
 </head>
 <body>
 
-<div id="mainBody"></div>
+<div id="mainBody">
+    <div class="scooter">
+        <button data-bind="click: reset" id="resetButton">Reset</button>
+        <button data-bind="click: go" id="goButton">Go!</button>
+        <div class="menu" data-bind="foreach: attendees">
+            <div class="box"
+                 data-bind="attr: {id: name},
+                            style: {left: left, top: top},
+                            css: {'animate-puff': animationClass() === 'animate-puff',
+                                  'animate-shrink': animationClass() === 'animate-shrink',
+                                  'animate-rotate': animationClass() === 'animate-rotate'}">
+                <span id="boxText" data-bind="text: name"></span>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script type="text/javascript">
-    dojoConfig = {
-        packages: [{
-            name: 'scooter', location: 'http://localhost:8080'
-        }]
-    };
-</script>
-<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
-<script type="text/javascript">
-    require( ['scooter/Scooter', 'dojo/domReady!'], function( Scooter ){
-        new Scooter({
-            attendeeList: ATTENDEE_LIST
-        }, "mainBody");
-    });
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"
+        data-main="main"></script>
 
 </body>
 </html>

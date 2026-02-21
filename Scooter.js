@@ -1,110 +1,74 @@
-/**
- * inspired by https://github.com/dojo/demos/tree/master/css3
- * and uses Dojo - http://dojotoolkit.org/
+/*
+ * Copyright 2026 Michael Easter / @codetojoy
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-define([
-  "dojo/_base/declare",
-  "dojo/dom-construct",
-  "dojo/dom-style",
-  "dijit/_WidgetBase",
-  "dijit/_TemplatedMixin",
-  "dijit/_WidgetsInTemplateMixin",
-  "scooter/AttendeeList",
-  "scooter/utils",
-  "dojox/css3/fx",
-  "dojo/text!scooter/template/scooter.html",
-], function (
-  declare,
-  domConstruct,
-  domStyle,
-  _WidgetBase,
-  _TemplatedMixin,
-  _WidgetsInTemplateMixin,
-  AttendeeList,
-  utils,
-  cssFX,
-  template
-) {
-  return declare(
-    "Scooter",
-    [_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin],
-    {
-      //These elements will be populated by the template
-      _menuNode: null,
+define(['knockout', 'scooter/AttendeeList', 'scooter/utils'], function(ko, AttendeeList, utils) {
 
-      templateString: template,
+    const NUM_BOXES_PER_ROW = 6;
+    const LOSER_ANIMATIONS = ['animate-puff', 'animate-shrink'];
 
-      //private variables used in the app
-      _boxes: [],
-      _attendeeList: AttendeeList([]),
+    function ScooterViewModel(names) {
+        const self = this;
+        const attendeeList = new AttendeeList(names);
 
-      _setAttendeeListAttr: function (attendees) {
-        this._attendeeList.init(attendees);
-      },
+        const numNames = attendeeList.getNumNames();
+        console.log('TRACER Scooter: initializing with ' + numNames + ' attendees');
 
-      postCreate: function () {
-        const numNames = this._attendeeList.getNumNames();
-
-        const numBoxesPerRow = 6;
-
+        const attendeeItems = [];
         for (let i = 0; i < numNames; i++) {
-          const name = this._attendeeList.getName(i);
-          const box = domConstruct.create(
-            "div",
-            {
-              innerHTML: "<span id='boxText'>" + name + "</span>",
-              className: "box",
-              id: name,
-              style: {
-                left: (i % numBoxesPerRow) * 200 + "px",
-                top: Math.floor(i / numBoxesPerRow) * 175 + "px",
-              },
-            },
-            this._menuNode
-          );
-
-          this._boxes.push(box);
+            const name = attendeeList.getName(i);
+            attendeeItems.push({
+                name: name,
+                left: (i % NUM_BOXES_PER_ROW) * 200 + 'px',
+                top: Math.floor(i / NUM_BOXES_PER_ROW) * 175 + 'px',
+                animationClass: ko.observable('')
+            });
         }
-      },
 
-      _resetClickEvent: function () {
-        this._boxes.forEach(function (node) {
-          domStyle.set(node, {
-            transform: "scale(1)",
-            opacity: "1",
-          });
+        self.attendees = ko.observableArray(attendeeItems);
 
-          this._attendeeList.reset();
-        }, this);
-      },
+        self.reset = function() {
+            console.log('TRACER Scooter: reset');
+            attendeeList.reset();
+            self.attendees().forEach(function(attendee) {
+                attendee.animationClass('');
+            });
+        };
 
-      _goClickEvent: function () {
-        const loserAnimations = ["puff", "shrink"];
+        self.go = function() {
+            console.log('TRACER Scooter: go round, survivors: ' + attendeeList.getNumSurvivors());
 
-        // Each person has a 1-in-N chance of losing this round.
-        // Note it is possible for no one to lose in a given round.
+            // Each person has a 1-in-N chance of losing this round.
+            // Note it is possible for no one to lose in a given round.
+            self.attendees().forEach(function(attendee) {
+                const isLoser = attendeeList.isLoserThisRound(attendee.name);
+                if (isLoser) {
+                    const animation = utils.pickOne(LOSER_ANIMATIONS);
+                    attendee.animationClass(animation);
+                }
+            });
 
-        this._boxes.forEach(function (node) {
-          const name = node.id;
-          const isLoser = this._attendeeList.isLoserThisRound(name);
-
-          if (isLoser) {
-            animation = utils.pickOne(loserAnimations);
-            cssFX[animation]({ node: node }).play();
-          }
-        }, this);
-
-        if (this._attendeeList.doesWinnerExist()) {
-          this._boxes.forEach(function (node) {
-            const name = node.id;
-            const isWinner = this._attendeeList.isWinner(name);
-
-            if (isWinner) {
-              cssFX["rotate"]({ node: node }).play();
+            if (attendeeList.doesWinnerExist()) {
+                self.attendees().forEach(function(attendee) {
+                    const isWinner = attendeeList.isWinner(attendee.name);
+                    if (isWinner) {
+                        attendee.animationClass('animate-rotate');
+                    }
+                });
             }
-          }, this);
-        }
-      },
+        };
     }
-  );
+
+    return ScooterViewModel;
 });

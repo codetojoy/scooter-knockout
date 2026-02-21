@@ -19,14 +19,22 @@ Use **Jasmine** for unit tests of game logic (e.g., `AttendeeList`, `utils`). No
 
 ## Architecture
 
-The app uses Dojo 1.10.x (loaded from CDN) with AMD module loading. There is no build step, no npm, and no transpilation.
+The app uses **RequireJS 2.3.7** for AMD module loading and **Knockout JS 3.5.1** for data binding and the ViewModel. Both libraries are vendored locally (no CDN dependency at runtime). There is no build step, no npm, and no transpilation.
+
+The app was originally written with Dojo 1.10.x (Phase 0). Phase 1 refactored it to RequireJS + Knockout while preserving all game logic and UX unchanged.
 
 **Core modules:**
 
-- `ATTENDEE_LIST_EDIT_THIS_ONE.js` — the only file end users need to edit; contains the list of attendee names
-- `AttendeeList.js` — domain model/game state: tracks `names`, `survivors`, and `losers`; contains the elimination logic (`isLoserThisRound`, `loses`, `doesWinnerExist`)
-- `utils.js` — pure utility functions: `shuffleNames` (Fisher-Yates), `pickOne`, `oneInNChance`, `getRandom`
-- `Scooter.js` — Dojo widget (`_WidgetBase` + `_TemplatedMixin`) that owns all UI interaction; binds to `template/scooter.html`; uses Dojo CSS3 effects for animations (puff/shrink for losers, rotate for winner)
+- `ATTENDEE_LIST_EDIT_THIS_ONE.js` — the only file end users need to edit; contains the list of attendee names; sets the global `ATTENDEE_LIST` array
+- `AttendeeList.js` — domain model/game state: tracks `names`, `survivors`, and `losers`; contains the elimination logic (`isLoserThisRound`, `loses`, `doesWinnerExist`); plain AMD module, no framework dependency
+- `utils.js` — pure utility functions: `shuffleNames` (Fisher-Yates), `pickOne`, `oneInNChance`, `getRandom`; plain AMD module, no framework dependency
+- `Scooter.js` — Knockout ViewModel; owns all UI interaction; exposes `attendees` (observable array), `reset()`, and `go()` methods; animation state is tracked via `animationClass` observables on each attendee
+- `main.js` — RequireJS entry-point; configures module paths; instantiates `ScooterViewModel` and calls `ko.applyBindings`
+- `knockout-min.js` — Knockout JS 3.5.1, vendored locally
+
+**Template:** `template/scooter.html` documents the Knockout binding structure. The live template is inlined in `index.html` inside `#mainBody` — this avoids the need for the RequireJS `text!` plugin.
+
+**Animations:** Loser boxes use CSS `@keyframes` classes (`.animate-puff`, `.animate-shrink`) toggled via Knockout `css` bindings. The winner box uses `.animate-rotate` (single 360° rotation). These replace the former `dojox/css3/fx` effects.
 
 **Game flow:** Reset → shuffle attendees → Go rounds → each survivor has 1-in-4 chance to be eliminated per round → repeat until 1 survivor (winner) or 0 survivors (no winner, restart required).
 
@@ -67,4 +75,4 @@ Licensed under the Apache License, Version 2.0 (the "License");
 ...
 ```
 
-- Honor third-party library licenses (Dojo uses BSD/AFL licenses)
+- Honor third-party library licenses (RequireJS uses BSD/MIT license; Knockout JS uses MIT license)

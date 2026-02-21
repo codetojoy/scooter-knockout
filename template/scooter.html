@@ -1,5 +1,14 @@
 <div class="scooter">
-    <button data-dojo-attach-event="onClick:_resetClickEvent" id="resetButton">Reset</button>
-    <button data-dojo-attach-event="onClick:_goClickEvent" id="goButton">Go!</button>
-    <div data-dojo-attach-point="_menuNode" class="menu"></div>
+    <button data-bind="click: reset" id="resetButton">Reset</button>
+    <button data-bind="click: go" id="goButton">Go!</button>
+    <div class="menu" data-bind="foreach: attendees">
+        <div class="box"
+             data-bind="attr: {id: name},
+                        style: {left: left, top: top},
+                        css: {'animate-puff': animationClass() === 'animate-puff',
+                              'animate-shrink': animationClass() === 'animate-shrink',
+                              'animate-rotate': animationClass() === 'animate-rotate'}">
+            <span id="boxText" data-bind="text: name"></span>
+        </div>
+    </div>
 </div>
