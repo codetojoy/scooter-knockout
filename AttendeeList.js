@@ -64,6 +64,14 @@ define(['scooter/utils'], function(utils) {
         return this.doesWinnerExist() && this.survivors.indexOf(name) == 0;
     };
 
+    AttendeeList.prototype.initFromState = function(names, losers) {
+        this.names = names.slice();
+        this.losers = losers.slice();
+        this.survivors = names.filter(function(name) {
+            return losers.indexOf(name) === -1;
+        });
+    };
+
     AttendeeList.prototype.isLoserThisRound = function(name) {
         let result = false;
 

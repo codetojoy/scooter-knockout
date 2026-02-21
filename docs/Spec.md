@@ -27,3 +27,9 @@ See @docs/GameRules.md for the rules and example of the game.
 * [COMPLETE] Refactor existing code from Dojo to use Require JS 2.3.7 and Knockout JS 3.5.1.
     * [COMPLETE] No changes to UX or CSS at this time: do not worry about ux-ui-police skill, as changes will come in later phases.
     * [COMPLETE] No changes to game workflow (i.e. app behaviour). 
+
+### Phase 2 TODO items
+
+* [COMPLETE] Store state of play in browser local storage so that a browser restart maintains state of play: i.e. names that have been eliminated and names that are still eligible for the prize.
+    * [COMPLETE] If no state is present, then assume it is a new game.
+    * [COMPLETE] The reset button should clear local storage.
