@@ -153,3 +153,97 @@ test.describe('Scooter app', () => {
     });
 
 });
+
+test.describe('Manage dialog', () => {
+
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/');
+        await page.waitForSelector('.box');
+        await page.evaluate(() => localStorage.removeItem('scooter_state'));
+        await page.reload();
+        await page.waitForSelector('.box');
+    });
+
+    test('Manage button is visible on load', async ({ page }) => {
+        // test
+        await expect(page.locator('#manageButton')).toBeVisible();
+    });
+
+    test('clicking Manage opens the modal', async ({ page }) => {
+        // test
+        await page.click('#manageButton');
+        await expect(page.locator('#manageOverlay')).toBeVisible();
+    });
+
+    test('modal lists all current attendees', async ({ page }) => {
+        await page.click('#manageButton');
+        // test
+        const items = page.locator('#manageRight li');
+        await expect(items).toHaveCount(ATTENDEE_COUNT);
+    });
+
+    test('Close button hides the modal', async ({ page }) => {
+        await page.click('#manageButton');
+        // test
+        await page.click('#manageCloseButton');
+        await expect(page.locator('#manageOverlay')).toBeHidden();
+    });
+
+    test('Add appends the new name to the modal list', async ({ page }) => {
+        await page.click('#manageButton');
+        await page.fill('#newNameInput', 'Test Person');
+        // test
+        await page.click('#addAttendeeButton');
+        const items = page.locator('#manageRight li');
+        await expect(items).toHaveCount(ATTENDEE_COUNT + 1);
+        await expect(items.last()).toHaveText('Test Person');
+    });
+
+    test('Add creates a new box on the game board', async ({ page }) => {
+        await page.click('#manageButton');
+        await page.fill('#newNameInput', 'Test Person');
+        // test
+        await page.click('#addAttendeeButton');
+        await page.click('#manageCloseButton');
+        await expect(page.locator('.box')).toHaveCount(ATTENDEE_COUNT + 1);
+        await expect(page.locator('.box[id="Test Person"]')).toBeVisible();
+    });
+
+    test('added name is written to localStorage', async ({ page }) => {
+        await page.click('#manageButton');
+        await page.fill('#newNameInput', 'Test Person');
+        // test
+        await page.click('#addAttendeeButton');
+        const state = await page.evaluate(() => JSON.parse(localStorage.getItem('scooter_state')));
+        expect(state.names).toContain('Test Person');
+    });
+
+    test('added name survives a page reload', async ({ page }) => {
+        await page.click('#manageButton');
+        await page.fill('#newNameInput', 'Test Person');
+        await page.click('#addAttendeeButton');
+        // test
+        await page.reload();
+        await page.waitForSelector('.box');
+        await expect(page.locator('.box')).toHaveCount(ATTENDEE_COUNT + 1);
+        await expect(page.locator('.box[id="Test Person"]')).toBeVisible();
+    });
+
+    test('adding a blank name does nothing', async ({ page }) => {
+        await page.click('#manageButton');
+        // test
+        await page.click('#addAttendeeButton');
+        const items = page.locator('#manageRight li');
+        await expect(items).toHaveCount(ATTENDEE_COUNT);
+    });
+
+    test('adding a duplicate name does nothing', async ({ page }) => {
+        await page.click('#manageButton');
+        await page.fill('#newNameInput', 'Ludwig Beethoven');
+        // test
+        await page.click('#addAttendeeButton');
+        const items = page.locator('#manageRight li');
+        await expect(items).toHaveCount(ATTENDEE_COUNT);
+    });
+
+});

@@ -18,13 +18,21 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
     const NUM_BOXES_PER_ROW = 6;
     const LOSER_ANIMATIONS = ['animate-puff', 'animate-shrink'];
 
-    function _isSameAttendeeList(a, b) {
-        if (a.length !== b.length) { // guard
-            return false;
-        }
-        const sortedA = a.slice().sort();
-        const sortedB = b.slice().sort();
-        return sortedA.every(function(name, i) { return name === sortedB[i]; });
+    // Returns true if every name in baseNames exists in savedNames.
+    // savedNames may be a superset (names added via Manage dialog).
+    function _isBaseListCovered(baseNames, savedNames) {
+        return baseNames.every(function(name) {
+            return savedNames.indexOf(name) !== -1;
+        });
+    }
+
+    function _buildAttendeeItem(name, index) {
+        return {
+            name: name,
+            left: (index % NUM_BOXES_PER_ROW) * 200 + 'px',
+            top: Math.floor(index / NUM_BOXES_PER_ROW) * 175 + 'px',
+            animationClass: ko.observable('')
+        };
     }
 
     function ScooterViewModel(names) {
@@ -33,7 +41,7 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
         const savedState = storage.load();
         const attendeeList = new AttendeeList([]);
 
-        if (savedState && _isSameAttendeeList(names, savedState.names)) {
+        if (savedState && _isBaseListCovered(names, savedState.names)) {
             console.log('TRACER Scooter: restoring saved state');
             attendeeList.initFromState(savedState.names, savedState.losers);
         } else {
@@ -47,21 +55,18 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
         const attendeeItems = [];
         for (let i = 0; i < numNames; i++) {
             const name = attendeeList.getName(i);
-            let initialAnimation = '';
+            const item = _buildAttendeeItem(name, i);
             if (attendeeList.losers.indexOf(name) !== -1) {
-                initialAnimation = 'animate-shrink';
+                item.animationClass('animate-shrink');
             } else if (attendeeList.isWinner(name)) {
-                initialAnimation = 'animate-rotate';
+                item.animationClass('animate-rotate');
             }
-            attendeeItems.push({
-                name: name,
-                left: (i % NUM_BOXES_PER_ROW) * 200 + 'px',
-                top: Math.floor(i / NUM_BOXES_PER_ROW) * 175 + 'px',
-                animationClass: ko.observable(initialAnimation)
-            });
+            attendeeItems.push(item);
         }
 
         self.attendees = ko.observableArray(attendeeItems);
+        self.isManageOpen = ko.observable(false);
+        self.newAttendeeName = ko.observable('');
 
         self.reset = function() {
             console.log('TRACER Scooter: reset');
@@ -95,6 +100,39 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
             }
 
             storage.save(attendeeList.names, attendeeList.losers);
+        };
+
+        self.openManage = function() {
+            console.log('TRACER Scooter: open manage');
+            self.isManageOpen(true);
+        };
+
+        self.closeManage = function() {
+            console.log('TRACER Scooter: close manage');
+            self.isManageOpen(false);
+            self.newAttendeeName('');
+        };
+
+        self.addAttendee = function() {
+            const name = self.newAttendeeName().trim();
+
+            if (!name) { // guard
+                return;
+            }
+
+            const isDuplicate = self.attendees().some(function(a) { return a.name === name; });
+            if (isDuplicate) { // guard
+                return;
+            }
+
+            console.log('TRACER Scooter: adding attendee: ' + name);
+            attendeeList.addName(name);
+
+            const index = self.attendees().length;
+            self.attendees.push(_buildAttendeeItem(name, index));
+
+            storage.save(attendeeList.names, attendeeList.losers);
+            self.newAttendeeName('');
         };
     }
 

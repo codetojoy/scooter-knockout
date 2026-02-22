@@ -34,7 +34,16 @@ See @docs/GameRules.md for the rules and example of the game.
     * [COMPLETE] If no state is present, then assume it is a new game.
     * [COMPLETE] The reset button should clear local storage.
 
-### Phase 3
+### Phase 3 TODO items
 
 * [COMPLETE] Write Playwright tests for basic behaviour of the app.
 * [COMPLETE] Write Jasmine tests for Javascript code.
+
+### Phase 4 TODO items
+
+* [COMPLETE] Add a new button on the left side called "Manage".
+* [COMPLETE] When "Manage" is clicked, it should open a modal dialog with the following:
+    * [COMPLETE] At right, how a current list of attendee names.
+    * [COMPLETE] At left, have an text field box for a new name, plus a button called "Add".
+    * [COMPLETE] When "Add" is clicked, add the name to the list and write the new set to local storage.
+    * [COMPLETE] It is true that if local storage is cleared, the new name will be lost, but that is OK.

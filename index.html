@@ -16,6 +16,7 @@
     <div class="scooter">
         <button data-bind="click: reset" id="resetButton">Reset</button>
         <button data-bind="click: go" id="goButton">Go!</button>
+        <button data-bind="click: openManage" id="manageButton">Manage</button>
         <div class="menu" data-bind="foreach: attendees">
             <div class="box"
                  data-bind="attr: {id: name},
@@ -25,6 +26,23 @@
                                   'animate-rotate': animationClass() === 'animate-rotate'}">
                 <span id="boxText" data-bind="text: name"></span>
             </div>
+        </div>
+    </div>
+
+    <div id="manageOverlay" style="display: none" data-bind="visible: isManageOpen">
+        <div id="manageDialog">
+            <div id="manageLeft">
+                <input type="text" id="newNameInput"
+                       data-bind="value: newAttendeeName, valueUpdate: 'input'"
+                       placeholder="New attendee name">
+                <button data-bind="click: addAttendee" id="addAttendeeButton">Add</button>
+            </div>
+            <div id="manageRight">
+                <ul data-bind="foreach: attendees">
+                    <li data-bind="text: name"></li>
+                </ul>
+            </div>
+            <button data-bind="click: closeManage" id="manageCloseButton">Close</button>
         </div>
     </div>
 </div>

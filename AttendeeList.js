@@ -64,6 +64,11 @@ define(['scooter/utils'], function(utils) {
         return this.doesWinnerExist() && this.survivors.indexOf(name) == 0;
     };
 
+    AttendeeList.prototype.addName = function(name) {
+        this.names.push(name);
+        this.survivors.push(name);
+    };
+
     AttendeeList.prototype.initFromState = function(names, losers) {
         this.names = names.slice();
         this.losers = losers.slice();
