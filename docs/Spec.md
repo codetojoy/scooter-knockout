@@ -47,3 +47,10 @@ See @docs/GameRules.md for the rules and example of the game.
     * [COMPLETE] At left, have an text field box for a new name, plus a button called "Add".
     * [COMPLETE] When "Add" is clicked, add the name to the list and write the new set to local storage.
     * [COMPLETE] It is true that if local storage is cleared, the new name will be lost, but that is OK.
+
+### Phase 5 TODO items
+
+* [COMPLETE] Rename "Manage" button to "Config" including all code references.
+* [COMPLETE] In "Config" (formerly "Manage") modal, add an integer field for the value of N in the "1/N" dice roll. The minimum allowed-value is 2 and the maximum allowed-value is 10.
+    * [COMPLETE] Use this value in the actual dice-roll code.
+    * [COMPLETE] Store this value in local storage as part of the game state.

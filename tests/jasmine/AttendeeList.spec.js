@@ -86,14 +86,14 @@ define(['scooter/AttendeeList'], function(AttendeeList) {
             it('returns false when a winner already exists (guard)', function() {
                 const list = new AttendeeList(['Alice']); // sole survivor = already a winner
                 // test
-                expect(list.isLoserThisRound('Alice')).toBe(false);
+                expect(list.isLoserThisRound('Alice', 4)).toBe(false);
             });
 
             it('returns false when the name is already a loser (guard)', function() {
                 const list = new AttendeeList(NAMES.slice());
                 list.loses('Bob');
                 // test
-                expect(list.isLoserThisRound('Bob')).toBe(false);
+                expect(list.isLoserThisRound('Bob', 4)).toBe(false);
             });
 
             it('eventually returns true for a live survivor', function() {
@@ -101,7 +101,7 @@ define(['scooter/AttendeeList'], function(AttendeeList) {
                 // test
                 for (let i = 0; i < 100 && !eliminated; i++) {
                     const trial = new AttendeeList(NAMES.slice());
-                    if (trial.isLoserThisRound('Alice')) {
+                    if (trial.isLoserThisRound('Alice', 4)) {
                         eliminated = true;
                     }
                 }

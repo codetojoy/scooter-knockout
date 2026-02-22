@@ -16,7 +16,7 @@
     <div class="scooter">
         <button data-bind="click: reset" id="resetButton">Reset</button>
         <button data-bind="click: go" id="goButton">Go!</button>
-        <button data-bind="click: openManage" id="manageButton">Manage</button>
+        <button data-bind="click: openConfig" id="configButton">Config</button>
         <div class="menu" data-bind="foreach: attendees">
             <div class="box"
                  data-bind="attr: {id: name},
@@ -29,20 +29,23 @@
         </div>
     </div>
 
-    <div id="manageOverlay" style="display: none" data-bind="visible: isManageOpen">
-        <div id="manageDialog">
-            <div id="manageLeft">
+    <div id="configOverlay" style="display: none" data-bind="visible: isConfigOpen">
+        <div id="configDialog">
+            <div id="configLeft">
+                <label for="numChancesInput">Elimination chance: 1 in</label>
+                <input type="number" id="numChancesInput" min="2" max="10"
+                       data-bind="value: numChances, valueUpdate: 'input'">
                 <input type="text" id="newNameInput"
                        data-bind="value: newAttendeeName, valueUpdate: 'input'"
                        placeholder="New attendee name">
                 <button data-bind="click: addAttendee" id="addAttendeeButton">Add</button>
             </div>
-            <div id="manageRight">
+            <div id="configRight">
                 <ul data-bind="foreach: attendees">
                     <li data-bind="text: name"></li>
                 </ul>
             </div>
-            <button data-bind="click: closeManage" id="manageCloseButton">Close</button>
+            <button data-bind="click: closeConfig" id="configCloseButton">Close</button>
         </div>
     </div>
 </div>

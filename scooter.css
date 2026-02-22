@@ -73,7 +73,7 @@ body, html{
     text-align: center;
 }
 
-#manageButton {
+#configButton {
     position: absolute;
     left: 20px;
     top: 170px;
@@ -86,7 +86,7 @@ body, html{
     text-align: center;
 }
 
-#manageOverlay {
+#configOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -99,7 +99,7 @@ body, html{
     justify-content: center;
 }
 
-#manageDialog {
+#configDialog {
     background: #FFFFFF;
     border: 8px solid #7C4726;
     padding: 20px;
@@ -109,14 +109,28 @@ body, html{
     gap: 16px;
 }
 
-#manageLeft {
+#configLeft {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-#manageLeft input[type="text"] {
+#configLeft label {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #130C09;
+}
+
+#numChancesInput {
+    font-size: 1em;
+    padding: 6px;
+    border: 2px solid #7C4726;
+    width: 60px;
+    box-sizing: border-box;
+}
+
+#configLeft input[type="text"] {
     font-size: 1em;
     padding: 6px;
     border: 2px solid #7C4726;
@@ -135,7 +149,7 @@ body, html{
     width: 100%;
 }
 
-#manageRight {
+#configRight {
     flex: 1;
     max-height: 280px;
     overflow-y: auto;
@@ -144,7 +158,7 @@ body, html{
     text-align: left;
 }
 
-#manageRight ul {
+#configRight ul {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -152,11 +166,11 @@ body, html{
     color: #130C09;
 }
 
-#manageRight li {
+#configRight li {
     padding: 2px 0;
 }
 
-#manageCloseButton {
+#configCloseButton {
     width: 100%;
     background: #E52A1D;
     color: #FFFFFF;

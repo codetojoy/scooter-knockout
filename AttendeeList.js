@@ -77,12 +77,10 @@ define(['scooter/utils'], function(utils) {
         });
     };
 
-    AttendeeList.prototype.isLoserThisRound = function(name) {
+    AttendeeList.prototype.isLoserThisRound = function(name, numChances) {
         let result = false;
 
         if (!this.doesWinnerExist() && this.losers.indexOf(name) == -1) {
-            const numChances = 4;
-
             if (utils.oneInNChance(numChances)) {
                 this.loses(name);
                 result = true;

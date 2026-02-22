@@ -17,9 +17,12 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
 
     const NUM_BOXES_PER_ROW = 6;
     const LOSER_ANIMATIONS = ['animate-puff', 'animate-shrink'];
+    const DEFAULT_NUM_CHANCES = 4;
+    const MIN_NUM_CHANCES = 2;
+    const MAX_NUM_CHANCES = 10;
 
     // Returns true if every name in baseNames exists in savedNames.
-    // savedNames may be a superset (names added via Manage dialog).
+    // savedNames may be a superset (names added via Config dialog).
     function _isBaseListCovered(baseNames, savedNames) {
         return baseNames.every(function(name) {
             return savedNames.indexOf(name) !== -1;
@@ -33,6 +36,14 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
             top: Math.floor(index / NUM_BOXES_PER_ROW) * 175 + 'px',
             animationClass: ko.observable('')
         };
+    }
+
+    function _clampNumChances(value) {
+        const parsed = parseInt(value, 10);
+        if (isNaN(parsed)) { // guard
+            return DEFAULT_NUM_CHANCES;
+        }
+        return Math.min(MAX_NUM_CHANCES, Math.max(MIN_NUM_CHANCES, parsed));
     }
 
     function ScooterViewModel(names) {
@@ -64,9 +75,13 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
             attendeeItems.push(item);
         }
 
+        const restoredNumChances = savedState ? savedState.numChances : null;
+        const initialNumChances = restoredNumChances ? _clampNumChances(restoredNumChances) : DEFAULT_NUM_CHANCES;
+
         self.attendees = ko.observableArray(attendeeItems);
-        self.isManageOpen = ko.observable(false);
+        self.isConfigOpen = ko.observable(false);
         self.newAttendeeName = ko.observable('');
+        self.numChances = ko.observable(initialNumChances);
 
         self.reset = function() {
             console.log('TRACER Scooter: reset');
@@ -78,12 +93,13 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
         };
 
         self.go = function() {
-            console.log('TRACER Scooter: go round, survivors: ' + attendeeList.getNumSurvivors());
+            const numChances = _clampNumChances(self.numChances());
+            console.log('TRACER Scooter: go round, survivors: ' + attendeeList.getNumSurvivors() + ', numChances: ' + numChances);
 
             // Each person has a 1-in-N chance of losing this round.
             // Note it is possible for no one to lose in a given round.
             self.attendees().forEach(function(attendee) {
-                const isLoser = attendeeList.isLoserThisRound(attendee.name);
+                const isLoser = attendeeList.isLoserThisRound(attendee.name, numChances);
                 if (isLoser) {
                     const animation = utils.pickOne(LOSER_ANIMATIONS);
                     attendee.animationClass(animation);
@@ -99,18 +115,19 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
                 });
             }
 
-            storage.save(attendeeList.names, attendeeList.losers);
+            storage.save(attendeeList.names, attendeeList.losers, numChances);
         };
 
-        self.openManage = function() {
-            console.log('TRACER Scooter: open manage');
-            self.isManageOpen(true);
+        self.openConfig = function() {
+            console.log('TRACER Scooter: open config');
+            self.isConfigOpen(true);
         };
 
-        self.closeManage = function() {
-            console.log('TRACER Scooter: close manage');
-            self.isManageOpen(false);
+        self.closeConfig = function() {
+            console.log('TRACER Scooter: close config');
+            self.isConfigOpen(false);
             self.newAttendeeName('');
+            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()));
         };
 
         self.addAttendee = function() {
@@ -131,7 +148,7 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
             const index = self.attendees().length;
             self.attendees.push(_buildAttendeeItem(name, index));
 
-            storage.save(attendeeList.names, attendeeList.losers);
+            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()));
             self.newAttendeeName('');
         };
     }
