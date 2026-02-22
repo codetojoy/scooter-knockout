@@ -23,7 +23,8 @@
                             style: {left: left, top: top},
                             css: {'animate-puff': animationClass() === 'animate-puff',
                                   'animate-shrink': animationClass() === 'animate-shrink',
-                                  'animate-rotate': animationClass() === 'animate-rotate'}">
+                                  'animate-rotate': animationClass() === 'animate-rotate',
+                                  'animate-shake': animationClass() === 'animate-shake'}">
                 <span id="boxText" data-bind="text: name"></span>
             </div>
         </div>
@@ -39,6 +40,15 @@
                        data-bind="value: newAttendeeName, valueUpdate: 'input'"
                        placeholder="New attendee name">
                 <button data-bind="click: addAttendee" id="addAttendeeButton">Add</button>
+                <label for="removeFilterInput">Remove attendee:</label>
+                <input type="text" id="removeFilterInput"
+                       data-bind="value: removeFilter, valueUpdate: 'input'"
+                       placeholder="Filter names...">
+                <select id="removeSelect"
+                        data-bind="options: filteredAttendeeNames,
+                                   value: selectedAttendeeName,
+                                   optionsCaption: 'Select a name...'"></select>
+                <button data-bind="click: removeAttendee" id="removeAttendeeButton">Remove</button>
             </div>
             <div id="configRight">
                 <ul data-bind="foreach: attendees">
@@ -48,6 +58,8 @@
             <button data-bind="click: closeConfig" id="configCloseButton">Close</button>
         </div>
     </div>
+
+    <footer id="roundCounter">Round: <span data-bind="text: roundNumber"></span></footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"

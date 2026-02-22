@@ -54,3 +54,14 @@ See @docs/GameRules.md for the rules and example of the game.
 * [COMPLETE] In "Config" (formerly "Manage") modal, add an integer field for the value of N in the "1/N" dice roll. The minimum allowed-value is 2 and the maximum allowed-value is 10.
     * [COMPLETE] Use this value in the actual dice-roll code.
     * [COMPLETE] Store this value in local storage as part of the game state.
+
+### Phase 6 TODO items
+
+* [COMPLETE] In "Config" (formerly "Manage") modal, add a dropdown of current names on left side, along with a "Remove" button. When "Remove" is clicked, the selected name is removed from the attendees list (at right).
+    * [COMPLETE] For the "Remove" dropdown provide a text-field on top with fuzzy matching of names, to allow the user to find a name.
+
+### Phase 7 TODO items
+
+* [COMPLETE] For a round, in the event that there are no attendees eliminated, introduce a new animation that is applied to all remaining attendees. In this way, the user knows that the round has taken place.
+    * [COMPLETE] The animation should be a brief "shake" in place.
+* [COMPLETE] In the footer of the page, introduce a UI element for a "round counter", to further provide cues to the user about the round changes.

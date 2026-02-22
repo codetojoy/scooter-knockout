@@ -152,6 +152,42 @@ define(['scooter/AttendeeList'], function(AttendeeList) {
             });
         });
 
+        describe('removeName', function() {
+            it('removes the name from names', function() {
+                const list = new AttendeeList(NAMES.slice());
+                // test
+                list.removeName('Alice');
+                expect(list.getNumNames()).toBe(3);
+                expect(list.names).not.toContain('Alice');
+            });
+
+            it('removes the name from survivors when still a survivor', function() {
+                const list = new AttendeeList(NAMES.slice());
+                // test
+                list.removeName('Alice');
+                expect(list.survivors).not.toContain('Alice');
+                expect(list.getNumSurvivors()).toBe(3);
+            });
+
+            it('removes the name from losers when already eliminated', function() {
+                const list = new AttendeeList(NAMES.slice());
+                list.loses('Bob');
+                // test
+                list.removeName('Bob');
+                expect(list.losers).not.toContain('Bob');
+                expect(list.getNumLosers()).toBe(0);
+            });
+
+            it('does not affect other names', function() {
+                const list = new AttendeeList(NAMES.slice());
+                // test
+                list.removeName('Alice');
+                expect(list.names).toContain('Bob');
+                expect(list.names).toContain('Carol');
+                expect(list.names).toContain('Dave');
+            });
+        });
+
         describe('initFromState', function() {
             it('restores the names array', function() {
                 const list = new AttendeeList([]);

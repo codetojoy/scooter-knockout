@@ -135,11 +135,12 @@ test.describe('Scooter app', () => {
         }
     });
 
-    test('ignores stale localStorage state from a different attendee list', async ({ page }) => {
+    test('restores from savedState even when names differ from ATTENDEE_LIST', async ({ page }) => {
         await page.evaluate(() => {
             const fakeState = {
                 names: ['Fake Person 1', 'Fake Person 2'],
-                losers: ['Fake Person 1']
+                losers: ['Fake Person 1'],
+                numChances: 4
             };
             localStorage.setItem('scooter_state', JSON.stringify(fakeState));
         });
@@ -148,8 +149,8 @@ test.describe('Scooter app', () => {
         await page.reload();
         await page.waitForSelector('.box');
 
-        await expect(page.locator('.box')).toHaveCount(ATTENDEE_COUNT);
-        await expect(page.locator('.animate-puff, .animate-shrink, .animate-rotate')).toHaveCount(0);
+        await expect(page.locator('.box')).toHaveCount(2);
+        await expect(page.locator('.box.animate-shrink')).toHaveCount(1);
     });
 
 });
@@ -267,6 +268,106 @@ test.describe('Config dialog', () => {
         await page.waitForSelector('.box');
         await page.click('#configButton');
         await expect(page.locator('#numChancesInput')).toHaveValue('7');
+    });
+
+    test('remove filter input is visible in Config dialog', async ({ page }) => {
+        // test
+        await page.click('#configButton');
+        await expect(page.locator('#removeFilterInput')).toBeVisible();
+    });
+
+    test('typing in remove filter narrows the dropdown options', async ({ page }) => {
+        await page.click('#configButton');
+        // test
+        await page.fill('#removeFilterInput', 'Beethoven');
+        const options = await page.locator('#removeSelect option:not([value=""])').count();
+        expect(options).toBeLessThan(ATTENDEE_COUNT);
+        expect(options).toBeGreaterThan(0);
+    });
+
+    test('Remove removes the name from the attendee list', async ({ page }) => {
+        await page.click('#configButton');
+        await page.fill('#removeFilterInput', 'Ludwig Beethoven');
+        await page.selectOption('#removeSelect', 'Ludwig Beethoven');
+        // test
+        await page.click('#removeAttendeeButton');
+        const items = page.locator('#configRight li');
+        await expect(items).toHaveCount(ATTENDEE_COUNT - 1);
+    });
+
+    test('Remove removes the attendee box from the game board', async ({ page }) => {
+        await page.click('#configButton');
+        await page.fill('#removeFilterInput', 'Ludwig Beethoven');
+        await page.selectOption('#removeSelect', 'Ludwig Beethoven');
+        await page.click('#removeAttendeeButton');
+        // test
+        await page.click('#configCloseButton');
+        await expect(page.locator('.box')).toHaveCount(ATTENDEE_COUNT - 1);
+        await expect(page.locator('.box[id="Ludwig Beethoven"]')).toHaveCount(0);
+    });
+
+    test('removing when nothing is selected does nothing', async ({ page }) => {
+        await page.click('#configButton');
+        const countBefore = await page.locator('#configRight li').count();
+        // test
+        await page.click('#removeAttendeeButton');
+        await expect(page.locator('#configRight li')).toHaveCount(countBefore);
+    });
+
+    test('removal persists after page reload', async ({ page }) => {
+        await page.click('#configButton');
+        await page.fill('#removeFilterInput', 'Ludwig Beethoven');
+        await page.selectOption('#removeSelect', 'Ludwig Beethoven');
+        await page.click('#removeAttendeeButton');
+        await page.click('#configCloseButton');
+        // test
+        await page.reload();
+        await page.waitForSelector('.box');
+        await expect(page.locator('.box')).toHaveCount(ATTENDEE_COUNT - 1);
+        await expect(page.locator('.box[id="Ludwig Beethoven"]')).toHaveCount(0);
+    });
+
+});
+
+test.describe('Round counter', () => {
+
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/');
+        await page.waitForSelector('.box');
+        await page.evaluate(() => localStorage.removeItem('scooter_state'));
+        await page.reload();
+        await page.waitForSelector('.box');
+    });
+
+    test('round counter shows 0 on fresh load', async ({ page }) => {
+        // test
+        await expect(page.locator('#roundCounter')).toContainText('Round: 0');
+    });
+
+    test('round counter increments after Go', async ({ page }) => {
+        await page.click('#goButton');
+        // test
+        await expect(page.locator('#roundCounter')).toContainText('Round: 1');
+        await page.click('#goButton');
+        await expect(page.locator('#roundCounter')).toContainText('Round: 2');
+    });
+
+    test('round counter resets to 0 after Reset', async ({ page }) => {
+        await page.click('#goButton');
+        await page.click('#goButton');
+        // test
+        await page.click('#resetButton');
+        await expect(page.locator('#roundCounter')).toContainText('Round: 0');
+    });
+
+    test('round counter persists after page reload', async ({ page }) => {
+        await page.click('#goButton');
+        await page.click('#goButton');
+        await page.click('#goButton');
+        // test
+        await page.reload();
+        await page.waitForSelector('.box');
+        await expect(page.locator('#roundCounter')).toContainText('Round: 3');
     });
 
 });

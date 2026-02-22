@@ -21,14 +21,6 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
     const MIN_NUM_CHANCES = 2;
     const MAX_NUM_CHANCES = 10;
 
-    // Returns true if every name in baseNames exists in savedNames.
-    // savedNames may be a superset (names added via Config dialog).
-    function _isBaseListCovered(baseNames, savedNames) {
-        return baseNames.every(function(name) {
-            return savedNames.indexOf(name) !== -1;
-        });
-    }
-
     function _buildAttendeeItem(name, index) {
         return {
             name: name,
@@ -52,7 +44,7 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
         const savedState = storage.load();
         const attendeeList = new AttendeeList([]);
 
-        if (savedState && _isBaseListCovered(names, savedState.names)) {
+        if (savedState) {
             console.log('TRACER Scooter: restoring saved state');
             attendeeList.initFromState(savedState.names, savedState.losers);
         } else {
@@ -77,16 +69,30 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
 
         const restoredNumChances = savedState ? savedState.numChances : null;
         const initialNumChances = restoredNumChances ? _clampNumChances(restoredNumChances) : DEFAULT_NUM_CHANCES;
+        const initialRoundNumber = (savedState && savedState.roundNumber) ? savedState.roundNumber : 0;
 
         self.attendees = ko.observableArray(attendeeItems);
         self.isConfigOpen = ko.observable(false);
         self.newAttendeeName = ko.observable('');
         self.numChances = ko.observable(initialNumChances);
+        self.removeFilter = ko.observable('');
+        self.selectedAttendeeName = ko.observable('');
+        self.roundNumber = ko.observable(initialRoundNumber);
+
+        self.filteredAttendeeNames = ko.computed(function() {
+            const filter = self.removeFilter().trim().toLowerCase();
+            return self.attendees()
+                .map(function(a) { return a.name; })
+                .filter(function(name) {
+                    return !filter || name.toLowerCase().indexOf(filter) !== -1;
+                });
+        });
 
         self.reset = function() {
             console.log('TRACER Scooter: reset');
             storage.clear();
             attendeeList.reset();
+            self.roundNumber(0);
             self.attendees().forEach(function(attendee) {
                 attendee.animationClass('');
             });
@@ -98,9 +104,11 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
 
             // Each person has a 1-in-N chance of losing this round.
             // Note it is possible for no one to lose in a given round.
+            let newLosersCount = 0;
             self.attendees().forEach(function(attendee) {
                 const isLoser = attendeeList.isLoserThisRound(attendee.name, numChances);
                 if (isLoser) {
+                    newLosersCount++;
                     const animation = utils.pickOne(LOSER_ANIMATIONS);
                     attendee.animationClass(animation);
                 }
@@ -113,9 +121,25 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
                         attendee.animationClass('animate-rotate');
                     }
                 });
+            } else if (newLosersCount === 0) {
+                // No one eliminated this round: shake all survivors so user knows the round happened.
+                self.attendees().forEach(function(attendee) {
+                    if (attendee.animationClass() === '') {
+                        attendee.animationClass('animate-shake');
+                    }
+                });
+                setTimeout(function() {
+                    self.attendees().forEach(function(attendee) {
+                        if (attendee.animationClass() === 'animate-shake') { // guard
+                            attendee.animationClass('');
+                        }
+                    });
+                }, 500);
             }
 
-            storage.save(attendeeList.names, attendeeList.losers, numChances);
+            const roundNumber = self.roundNumber() + 1;
+            self.roundNumber(roundNumber);
+            storage.save(attendeeList.names, attendeeList.losers, numChances, roundNumber);
         };
 
         self.openConfig = function() {
@@ -127,7 +151,24 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
             console.log('TRACER Scooter: close config');
             self.isConfigOpen(false);
             self.newAttendeeName('');
-            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()));
+            self.removeFilter('');
+            self.selectedAttendeeName('');
+            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()), self.roundNumber());
+        };
+
+        self.removeAttendee = function() {
+            const name = self.selectedAttendeeName();
+
+            if (!name) { // guard
+                return;
+            }
+
+            console.log('TRACER Scooter: removing attendee: ' + name);
+            attendeeList.removeName(name);
+            self.attendees.remove(function(a) { return a.name === name; });
+            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()), self.roundNumber());
+            self.selectedAttendeeName('');
+            self.removeFilter('');
         };
 
         self.addAttendee = function() {
@@ -148,7 +189,7 @@ define(['knockout', 'scooter/AttendeeList', 'scooter/utils', 'scooter/storage'],
             const index = self.attendees().length;
             self.attendees.push(_buildAttendeeItem(name, index));
 
-            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()));
+            storage.save(attendeeList.names, attendeeList.losers, _clampNumChances(self.numChances()), self.roundNumber());
             self.newAttendeeName('');
         };
     }

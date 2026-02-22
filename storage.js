@@ -18,9 +18,9 @@ define(function() {
     const STORAGE_KEY = 'scooter_state';
 
     return {
-        save: function(names, losers, numChances) {
-            const state = { names: names, losers: losers, numChances: numChances };
-            console.log('TRACER storage: saving state, losers: ' + losers.length + ', numChances: ' + numChances);
+        save: function(names, losers, numChances, roundNumber) {
+            const state = { names: names, losers: losers, numChances: numChances, roundNumber: roundNumber };
+            console.log('TRACER storage: saving state, losers: ' + losers.length + ', numChances: ' + numChances + ', roundNumber: ' + roundNumber);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         },
 

@@ -77,6 +77,21 @@ define(['scooter/utils'], function(utils) {
         });
     };
 
+    AttendeeList.prototype.removeName = function(name) {
+        const nameIndex = this.names.indexOf(name);
+        if (nameIndex !== -1) {
+            this.names.splice(nameIndex, 1);
+        }
+        const survivorIndex = this.survivors.indexOf(name);
+        if (survivorIndex !== -1) {
+            this.survivors.splice(survivorIndex, 1);
+        }
+        const loserIndex = this.losers.indexOf(name);
+        if (loserIndex !== -1) {
+            this.losers.splice(loserIndex, 1);
+        }
+    };
+
     AttendeeList.prototype.isLoserThisRound = function(name, numChances) {
         let result = false;
 
